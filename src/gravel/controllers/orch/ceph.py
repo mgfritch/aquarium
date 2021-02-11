@@ -8,7 +8,7 @@ import rados
 import json
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Callable, Dict, Any, List
+from typing import Any, Callable, Dict, Optional
 
 
 class CephError(Exception):
@@ -25,7 +25,7 @@ class CephCommandError(CephError):
 
 class Ceph(ABC):
 
-    cluster: rados.Rados
+    cluster: Optional[rados.Rados] = None
 
     def __init__(self, confpath: str = "/etc/ceph/ceph.conf"):
 
@@ -95,12 +95,6 @@ class Ceph(ABC):
         except Exception as e:
             raise CephCommandError(e) from e
 
-    def mon(self, cmd: Dict[str, Any]) -> Any:
-        return self._cmd(self.cluster.mon_command, cmd)
-
-    def mgr(self, cmd: Dict[str, Any]) -> Any:
-        return self._cmd(self.cluster.mgr_command, cmd)
-
     @abstractmethod
     def call(self, cmd: Dict[str, Any]) -> Any:
         raise NotImplementedError("method 'call' has not been implemented")
@@ -112,7 +106,7 @@ class Mgr(Ceph):
         super().__init__()
 
     def call(self, cmd: Dict[str, Any]) -> Any:
-        return self.mgr(cmd)
+        return self._cmd(self.cluster.mgr_command, cmd)
 
 
 class Mon(Ceph):
@@ -121,7 +115,7 @@ class Mon(Ceph):
         super().__init__()
 
     def call(self, cmd: Dict[str, Any]) -> Any:
-        return self.mon(cmd)
+        return self._cmd(self.cluster.mon_command, cmd)
 
     @property
     def status(self) -> Dict[str, Any]:
