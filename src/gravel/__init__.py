@@ -3,4 +3,4 @@
 
 from gravel.controllers.gstate import GlobalState
 
-gstate: GlobalState = GlobalState()
+#gstate: GlobalState = GlobalState()
