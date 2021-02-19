@@ -28,8 +28,31 @@ class TestConfig(TestCase):
     def test_config_path(self):
         config = Config()
         assert config.confpath == Path('/etc/aquarium/config.json')
-        assert config.options.service_state_path == '/etc/aquarium/storage.json'
+        assert config.options.service_state_path == Path('/etc/aquarium/storage.json')
 
         config = Config(path='foo')
         assert config.confpath == Path('foo/config.json')
-        assert config.options.service_state_path == 'foo/storage.json'
+        assert config.options.service_state_path == Path('foo/storage.json')
+
+    def test_existing_config(self):
+        ss_path = '/foo/bar/baz/bang'
+        conf = '''
+{
+ "version": 2,
+ "name": "",
+ "deployment_state": {
+   "last_modified": "2021-02-17T16:57:07.071579",
+   "stage": "bootstrapped"
+ },
+ "options": {
+   "inventory_probe_interval": 60,
+   "storage_probe_interval": 30.0,
+   "service_state_path": "%s"
+ }
+}
+''' % (ss_path)
+        with open('config.json', 'w') as f:
+            f.write(conf)
+
+        config = Config(path='/')
+        assert config.options.service_state_path == Path(ss_path)
