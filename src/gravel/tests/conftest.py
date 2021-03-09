@@ -62,7 +62,7 @@ def gstate(mocker):
 
 @pytest.fixture()
 def services(gstate, mocker):
-    class MockStorage(mocker.MagicMock):
+    class MockStorage(mock.MagicMock):
         available = 2000
     mocker.patch('gravel.controllers.resources.storage', MockStorage)
     mocker.patch('gravel.controllers.services.Services._save')
