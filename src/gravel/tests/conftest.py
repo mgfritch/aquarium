@@ -56,8 +56,8 @@ def get_data_contents(fs):
 @pytest.fixture()
 def gstate(mocker):
     mocker.patch('gravel.controllers.config.Config')
-    from gravel.controllers.gstate import GlobalState
-    yield GlobalState()
+    from gravel.controllers.gstate import gstate as _gstate
+    yield _gstate
 
 
 @pytest.fixture()
