@@ -391,3 +391,16 @@ class Mon(Ceph):
         }
         results: Dict[str, Any] = self.call(cmd)
         return parse_obj_as(List[CephOSDPoolStatsModel], results)
+
+    def create_pool(self, name: str, size: Optional[int] = None) -> CephOSDPoolEntryModel:
+        cmd = {
+            "prefix": "osd pool create",
+            "pool": name,
+            "format": "json"
+        }
+
+        if size is not None:
+            cmd["size"] = str(size)
+
+        self.call(cmd)
+        return self.get_pool(name)
