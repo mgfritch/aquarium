@@ -356,21 +356,14 @@ class Services(Ticker):
         assert fs.name == svc.name
 
         mon = Mon()
-        pools: List[CephOSDPoolEntryModel] = mon.get_pools()
 
-        def get_pool(name: str) -> CephOSDPoolEntryModel:
-            for pool in pools:
-                if pool.pool_name == name:
-                    return pool
-            raise ServiceError(f"unknown pool {name}")
-
-        metadata_pool = get_pool(fs.metadata_pool)
+        metadata_pool: CephOSDPoolEntryModel = mon.get_pool(fs.metadata_pool)
         if metadata_pool.size != svc.replicas:
             mon.set_pool_size(metadata_pool.pool_name, svc.replicas)
         svc.pools.append(metadata_pool.pool)
 
         for name in fs.data_pools:
-            data_pool = get_pool(name)
+            data_pool: CephOSDPoolEntryModel = mon.get_pool(name)
             if data_pool.size != svc.replicas:
                 mon.set_pool_size(data_pool.pool_name, svc.replicas)
             svc.pools.append(data_pool.pool)

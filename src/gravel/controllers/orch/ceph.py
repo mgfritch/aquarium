@@ -72,6 +72,10 @@ class NoRulesetError(CephError):
     pass
 
 
+class CephOSDPoolNotFound(CephError):
+    pass
+
+
 class Ceph(ABC):
 
     cluster: rados.Rados
@@ -212,6 +216,12 @@ class Mon(Ceph):
     def get_pools(self) -> List[CephOSDPoolEntryModel]:
         osdmap = self.get_osdmap()
         return osdmap.pools
+
+    def get_pool(self, name: str) -> CephOSDPoolEntryModel:
+        for pool in self.get_pools():
+            if pool.pool_name == name:
+                return pool
+        raise CephOSDPoolNotFound()
 
     def _get_ruleset_id(self, name: str) -> int:
         cmd = {
