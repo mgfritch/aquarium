@@ -302,7 +302,7 @@ if [ -d venv ] ; then
     echo "Detected an existing virtual environment:"
     echo "  > $(realpath venv)"
     if yes_no "Blow it away"; then
-        rm -rf venv || exit $?
+        sudo rm -rf venv || exit $?
     fi
     echo
 fi
