@@ -27,6 +27,7 @@ from gravel.controllers.orch.models import (
     CephFSListEntryModel,
     CephOSDPoolEntryModel
 )
+from gravel.controllers.orch.orchestrator import Orchestrator, OrchHostListModel
 from gravel.controllers.orch.nfs import (
     NFSBackingStoreEnum,
     NFSError,
@@ -400,7 +401,12 @@ class Services(Ticker):
             logger.info(f"creating nfs recovery pool: {nfs_pool_name}")
             nfs_pool = mon.create_pool(nfs_pool_name)
 
-        mon.set_pool_size(nfs_pool.pool_name, 2)
+        orch_hosts: List[OrchHostListModel] = Orchestrator().host_ls()
+        if len(orch_hosts) < 3:
+            mon.set_pool_size(nfs_pool.pool_name, 2)
+        else:
+            mon.set_pool_size(nfs_pool.pool_name, 3)
+
         mon.pool_app_enable(nfs_pool_name, 'nfs')
 
         # create an generic NFS service
