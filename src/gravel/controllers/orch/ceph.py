@@ -404,3 +404,19 @@ class Mon(Ceph):
 
         self.call(cmd)
         return self.get_pool(name)
+
+    def pool_app_enable(self, name: str, app: str) -> bool:
+        cmd = {
+            "prefix": "osd pool application enable",
+            "pool": name,
+            "app": app,
+            "format": "json"
+        }
+        try:
+            self.call(cmd)
+        except CephCommandError as e:
+            logger.error(
+                f"mon > unable to enable pool application: {app} on {name}")
+            logger.exception(e)
+            return False
+        return True

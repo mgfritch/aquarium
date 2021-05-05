@@ -401,6 +401,7 @@ class Services(Ticker):
             nfs_pool = mon.create_pool(nfs_pool_name)
 
         mon.set_pool_size(nfs_pool.pool_name, 2)
+        mon.pool_app_enable(nfs_pool_name, 'nfs')
 
         # create an generic NFS service
         nfs_svc_id = 'gravel'
