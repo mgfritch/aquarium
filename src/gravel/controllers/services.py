@@ -21,7 +21,7 @@ from gravel.controllers.nodes.mgr import (
     NodeMgr
 )
 
-from gravel.controllers.orch.ceph import Mon
+from gravel.controllers.orch.ceph import Mon, CephOSDPoolNotFound
 from gravel.controllers.orch.cephfs import CephFS, CephFSError
 from gravel.controllers.orch.models import (
     CephFSListEntryModel,
@@ -384,6 +384,23 @@ class Services(Ticker):
 
         # create a cephfs
         self._create_cephfs(svc)
+
+        # pre-create the NFS recovery pool
+        mon = Mon()
+        nfs_pool_name: str = 'nfs-ganesha'
+        nfs_pool: Optional[CephOSDPoolEntryModel] = None
+        try:
+            nfs_pool = mon.get_pool(nfs_pool_name)
+            logger.info(f"found nfs recovery pool: {nfs_pool_name}")
+        except CephOSDPoolNotFound:
+            pass
+
+        if not nfs_pool:
+            # create a new pool
+            logger.info(f"creating nfs recovery pool: {nfs_pool_name}")
+            nfs_pool = mon.create_pool(nfs_pool_name)
+
+        mon.set_pool_size(nfs_pool.pool_name, 2)
 
         # create an generic NFS service
         nfs_svc_id = 'gravel'
