@@ -222,10 +222,21 @@ class NodeMgr:
             assert nodeinfo
             await self._node_prestart(nodeinfo)
 
+        async def _adjust_nfs_recovery_pool() -> bool:
+            try:
+                NFS().adjust_nfs_recovery_pool()
+            except NFSError as e:
+                logger.error(f"unable to adjust nfs recovery pool: {e.message}")
+                return False
+            return True
+
         async def _task() -> None:
             if not await _obtain_images():
                 # xxx: find way to shutdown here?
                 return
+            if not await _adjust_nfs_recovery_pool():
+                # xxx: err handling?
+                pass
             await self.gstate.inventory.subscribe(
                 _inventory_subscriber,
                 once=True
